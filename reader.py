@@ -29,6 +29,7 @@ class Ext4FileSystemReader:
     def __init__(self, args):
         self.file_system = False
         self.file_system_size = False
+        self.recover_files = False
 
         opts, _ = getopt(args, 'f:s:r:')
         for option, value in opts:
@@ -41,8 +42,6 @@ class Ext4FileSystemReader:
             if option == '-r':
                 if value == 'yes':
                     self.recover_files = True
-                else:
-                    self.recover_files = False
 
         if self.file_system and self.file_system_size:
             self.read_first_block()

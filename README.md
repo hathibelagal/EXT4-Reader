@@ -10,7 +10,9 @@ Note: I am working on this tool primarily to recover data from a filesystem that
 This tool expects the path of the file system, along with its size (in bytes).
 
 ```
-./reader.py -f <filesystem> -s <size>
+./reader.py -f <filesystem> -s <size> -r <yes|no>
 ```
+
+Beware that by using the recovery option, you get a dump of the contents of all the files on the file system.
 
 I've tested it only on Ubuntu 14.04.
