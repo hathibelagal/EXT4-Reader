@@ -105,10 +105,12 @@ class Ext4FileSystemReader:
                 print("  ERROR: This block group descriptor size is not supported.")
                 exit(1)
             if incompat_details[1] & 0x200:
-                print("  This FS has flexible block groups")
+                self.flex = True
+                self.flex_size = 2 ** struct.unpack('b',super_block[0x174])[0]
+                print("  This FS has flexible block groups of size %d" % self.flex_size)
             if incompat_details[2] & 0x1:
                 print("  Sparse super blocks: True")
-                self.sparse_super_blocks = True
+                self.sparse_super_blocks = True            
 
             #Skip rest of the block
             f.read(2048)
@@ -152,7 +154,6 @@ class Ext4FileSystemReader:
         inode_number = 1
         with open(self.file_system) as f:
             for block_group_number in xrange(self.number_of_block_groups):
-                block_group = f.read(self.block_group_size)
 
                 #Read only initialized inode tables
                 if self.inode_tables[block_group_number]['flags'] != 4:
@@ -160,13 +161,21 @@ class Ext4FileSystemReader:
                     continue
 
                 print("Reading inode table of block group %d"%(block_group_number))
-                starting_position = self.block_size * self.inode_tables[block_group_number]['location']
+                starting_position = self.inode_tables[block_group_number]['location']
+                f.seek(starting_position * self.block_size)
                 for q in xrange(self.inodes_per_group):
-                    current_inode = block_group[starting_position:starting_position + self.inode_size] 
-                    current_inode = struct.unpack('2H5I', current_inode[:2 * 2 + 5 * 4])
-                    if current_inode[2] > 0:
-                        print "%d -> (%x, %x, %d)" % (inode_number, current_inode[0], current_inode[1], current_inode[2])
-                    starting_position += self.inode_size
+                    current_inode = f.read(self.inode_size)
+                    current_inode_meta_data = struct.unpack('2H5I', current_inode[:2 * 2 + 5 * 4])
+                    current_file_size = current_inode_meta_data[2]
+                    current_file_type = "Other"
+                    if current_inode_meta_data[0] & 0x4000:
+                        current_file_type = "Directory"
+                    elif current_inode_meta_data[0] & 0x8000:
+                        current_file_type = "Regular file"
+                    number_of_512_blocks = struct.unpack('I', current_inode[0x1C: 0x1C + 1 * 4])[0]
+                    uses_extents = (struct.unpack('I', current_inode[0x20: 0x20 + 1 * 4])[0] & 0x80000) != 0
+                    if current_file_size > 0:
+                        print "%d -> (Permissions: %x, Size: %d, Type: %s, sBlocks: %d, Extents: %s)" % (inode_number, current_inode_meta_data[0], current_inode_meta_data[2], current_file_type, number_of_512_blocks, uses_extents)
                     inode_number += 1
 
 if __name__ == "__main__":
