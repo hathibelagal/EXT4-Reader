@@ -175,7 +175,12 @@ class Ext4FileSystemReader:
                     number_of_512_blocks = struct.unpack('I', current_inode[0x1C: 0x1C + 1 * 4])[0]
                     uses_extents = (struct.unpack('I', current_inode[0x20: 0x20 + 1 * 4])[0] & 0x80000) != 0
                     if current_file_size > 0:
-                        print "%d -> (Permissions: %x, Size: %d, Type: %s, sBlocks: %d, Extents: %s)" % (inode_number, current_inode_meta_data[0], current_inode_meta_data[2], current_file_type, number_of_512_blocks, uses_extents)
+                        print "%d -> (Permissions: %x, Size: %d, Type: %s, sBlocks: %d, Extents: %s)" % (inode_number, 
+                                current_inode_meta_data[0], 
+                                current_inode_meta_data[2], 
+                                current_file_type, 
+                                number_of_512_blocks, 
+                                uses_extents)
                     inode_number += 1
 
 if __name__ == "__main__":
