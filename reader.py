@@ -24,6 +24,7 @@ import struct
 from getopt import getopt
 import sys
 
+
 class Ext4FileSystemReader:
     
     def __init__(self, args):
