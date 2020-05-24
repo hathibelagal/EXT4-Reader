@@ -161,7 +161,7 @@ class Ext4FileSystemReader:
             for block_group_number in xrange(self.number_of_block_groups):
 
                 #Read only initialized inode tables
-                if self.inode_tables[block_group_number]['flags'] != 4:
+                if (self.inode_tables[block_group_number]['flags'] & 4) != 0:
                     print("Inode table uninitialized in block group %d" % block_group_number)
                     continue
 
